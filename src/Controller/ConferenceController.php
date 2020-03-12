@@ -2,33 +2,44 @@
 
 namespace App\Controller;
 
+use App\Entity\Conference;
+use App\Repository\CommentRepository;
+use App\Repository\ConferenceRepository;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
+use Twig\Environment;
+
 
 class ConferenceController extends AbstractController
 {
     /**
      * @Route("/", name="homepage")
-     * @param Request $request
+     * @param ConferenceRepository $conferenceRepository
+     * @param Environment $twig
      * @return Response
+     * @throws
      */
-    public function index(Request $request)
+    public function index(Environment $twig, ConferenceRepository $conferenceRepository)
     {
-        $greet = '';
-        if ($name = $request->query->get('hello')) {
-            $greet = sprintf('<h1>Hello %s</h1>', htmlspecialchars($name));
-        }
-        return new Response(<<<EOF
-                    <html>
-                        <body style="display: flex; align-items: center; justify-content: center">
-                            <div>$greet<br>
-                            <img src="/images/under-construction.gif" />
-                            </div>
-                        </body>
-                    </html>
-EOF
-        );
+        return new Response($twig->render('conference/index.html.twig', [
+            'conferences' => $conferenceRepository->findAll(),
+        ]));
+    }
+
+    /**
+     * @Route("/conference/{id}", name="conference")
+     * @param CommentRepository $commentRepository
+     * @param Conference $conference
+     * @param Environment $twig
+     * @return Response
+     * @throws
+     */
+    public function show(Environment $twig, Conference $conference, CommentRepository $commentRepository)
+    {
+        return new Response($twig->render('conference/show.html.twig', [
+            'conference' => $conference,
+            'comments' => $commentRepository->findBy(['conference' => $conference], ['createdAt' => 'DESC']),
+        ]));
     }
 }
