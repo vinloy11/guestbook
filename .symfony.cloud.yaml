@@ -4,6 +4,7 @@ type: php:7.3
 
 runtime:
     extensions:
+        - redis
         - apcu
         - mbstring
         - sodium
@@ -13,6 +14,9 @@ runtime:
 
 build:
     flavor: none
+
+relationships:
+    redis: "rediscache:redis"
 
 web:
     locations:
